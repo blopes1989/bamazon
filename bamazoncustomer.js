@@ -17,6 +17,7 @@ connection.connect(function (err) {
   console.log("connected")
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
+  console.log("Welcome to Bamazon, where shopping is as easy as pressing keys. ")
   start();
 });
 
@@ -27,7 +28,7 @@ function start() {
   Inquirer.prompt({
     name: "buyOrleave",
     type: "rawlist",
-    message: "Welcome to Bamazon, where shopping is as easy as pressing keys.  Would you like to [buy] or [comeback later]",
+    message: "Would you like to [buy] or [comeback later]",
     choices: ["Buy", "Comeback Later"]
   })
     .then(function (answer) {
@@ -49,7 +50,7 @@ function buynow() {
     if (err) throw err;
 
     for (var i = 0; i < results.length; i++) {
-      console.log("Product id:" + results[i].id, "Product Name: " + results[i].item_name, "Quantity in inventory: " + results[i].quantity)
+      console.log("ID: #" + results[i].id, "Product Name: " + results[i].item_name, "Quantity in inventory: " + results[i].quantity, "Price Per:$" + results[i].price)
       itemArr.push(results[i])
 
 
@@ -68,20 +69,20 @@ function chooseProduct() {
 
   ]).then(function (answer) {
     connection.query("SELECT * FROM list WHERE ?", { id: answer.choice }, function (err, res) {
-      console.log("Product Name: " + res[0].item_name)
-      console.log("Quantity in inventory: " + res[0].quantity)
-      chooseQuantity();
+      console.log("Product Name: " + res[0].item_name, "Quantity in stock: " + res[0].quantity, "Price Per:$" + res[0].price)
+      chooseQuantity(answer.choice, res[0].quantity);
+
     });
-    
-    
+
+
 
 
 
 
   })
-  
+
 }
-function chooseQuantity () {
+function chooseQuantity(id, inStock) {
   Inquirer.prompt([
     {
       name: "choice",
@@ -89,21 +90,20 @@ function chooseQuantity () {
       message: "How many would you like buy?"
     },
 
-  ]).then(function (answer) {
+  ]).then(function (anwser) {
     // left off here
-    connection.query(function(err) {
-      console.log("connect to database")
-      // if (err) throw err;
-      // var sql = "UPDATE stock_quantity  ;
-      // con.query(sql, function (err, result) {
-      //   if (err) throw err;
-      //   console.log(
-      //     //Confirmation responce
-      //     //would you like to make more purcharces or leave
+    connection.query(function (err) {
+      var query = connection.query("UPDATE list SET quantity=" + (inStock - anwser.choice) + " Where id=" + id, function (err, res) {
+        if (err) console.log(err)
 
-      //   );});
-    });;
+        console.log("Thank you for your purchase")
+
+        start();
+      });
+
+
+    });
   })
-  
- 
+
+
 };
