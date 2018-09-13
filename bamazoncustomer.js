@@ -50,7 +50,7 @@ function buynow() {
     if (err) throw err;
 
     for (var i = 0; i < results.length; i++) {
-      console.log("ID: #" + results[i].item_id, "Product Name: " + results[i].product_name, "Quantity in inventory: " + results[i].stock_quantity,"Price Per:$" + results[i].price)
+      console.log("ID: #" + results[i].item_id, "Product Name: " + results[i].product_name, "Quantity in inventory: " + results[i].stock_quantity, "Price Per:$" + results[i].price)
       itemArr.push(results[i])
 
 
@@ -68,23 +68,23 @@ function chooseProduct() {
     },
 
   ]).then(function (answer) {
-    connection.query("SELECT * FROM list WHERE ?", { id: answer.choice }, function (err, res) {
-console.log(res[0])
+    connection.query("SELECT * FROM list WHERE ?", { item_id: answer.choice }, function (err, res) {
 
-      console.log("Product Name: " + res[0].product_name,"Quantity in stock: " + res[0].stock_quantity,"Price Per:$" + res[0].price)
-      chooseQuantity(answer.choice,res[0].stock_quantity );
+      console.log("Product Name: " + res[0].product_name, "Quantity in stock: " + res[0].stock_quantity, "Price Per:$" + res[0].price)
+      chooseQuantity(answer.choice, res[0].stock_quantity, res[0].price);
+      
 
     });
-    
-    
+
+
 
 
 
 
   })
-  
+
 }
-function chooseQuantity (id, inStock) {
+function chooseQuantity(id, inStock, unitPrice) {
   Inquirer.prompt([
     {
       name: "choice",
@@ -93,19 +93,29 @@ function chooseQuantity (id, inStock) {
     },
 
   ]).then(function (anwser) {
-    connection.query(function(err) {
-      var query = connection.query("UPDATE list SET stock_quantity="  + (inStock- anwser.choice) + " Where item_id=" + id , function(err, res){
-      if(err) console.log(err)
+    connection.query(function (err) {
+      if (anwser.choice < inStock) {
+        var query = connection.query("UPDATE list SET stock_quantity=" + (inStock - anwser.choice) + " Where item_id=" + id, function (err, res) {
+          if (err) console.log(err)
 
-      console.log("Thank you for your purchase")
-      console.log("what would you like to do next")
+          //total amount of purchase here
 
-      start();
+          console.log("Thank you for your purchase! This will cost $" + anwser.choice* unitPrice )
+          console.log("What would you like to do next?")
+
+          start();
+        })
+      }
+      else {
+        console.log("Sorry, we dont have that many in stock; please start over.")
+        start();
+      }
+
     });
-    
 
-    });
-  })
-  
- 
+
+  });
+
+
+
 };
