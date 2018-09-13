@@ -17,7 +17,7 @@ connection.connect(function (err) {
   console.log("connected")
   if (err) throw err;
   // run the start function after the connection is made to prompt the user
-  console.log("Welcome to Bamazon, where shopping is as easy as pressing keys. ")
+  console.log("Welcome Bamazon provides many Choices")
   start();
 });
 
@@ -50,7 +50,7 @@ function buynow() {
     if (err) throw err;
 
     for (var i = 0; i < results.length; i++) {
-      console.log("ID: #" + results[i].id, "Product Name: " + results[i].item_name, "Quantity in inventory: " + results[i].quantity, "Price Per:$" + results[i].price)
+      console.log("ID: #" + results[i].item_id, "Product Name: " + results[i].product_name, "Quantity in inventory: " + results[i].stock_quantity,"Price Per:$" + results[i].price)
       itemArr.push(results[i])
 
 
@@ -69,20 +69,22 @@ function chooseProduct() {
 
   ]).then(function (answer) {
     connection.query("SELECT * FROM list WHERE ?", { id: answer.choice }, function (err, res) {
-      console.log("Product Name: " + res[0].item_name, "Quantity in stock: " + res[0].quantity, "Price Per:$" + res[0].price)
-      chooseQuantity(answer.choice, res[0].quantity);
+console.log(res[0])
+
+      console.log("Product Name: " + res[0].product_name,"Quantity in stock: " + res[0].stock_quantity,"Price Per:$" + res[0].price)
+      chooseQuantity(answer.choice,res[0].stock_quantity );
 
     });
-
-
+    
+    
 
 
 
 
   })
-
+  
 }
-function chooseQuantity(id, inStock) {
+function chooseQuantity (id, inStock) {
   Inquirer.prompt([
     {
       name: "choice",
@@ -91,19 +93,19 @@ function chooseQuantity(id, inStock) {
     },
 
   ]).then(function (anwser) {
-    // left off here
-    connection.query(function (err) {
-      var query = connection.query("UPDATE list SET quantity=" + (inStock - anwser.choice) + " Where id=" + id, function (err, res) {
-        if (err) console.log(err)
+    connection.query(function(err) {
+      var query = connection.query("UPDATE list SET stock_quantity="  + (inStock- anwser.choice) + " Where item_id=" + id , function(err, res){
+      if(err) console.log(err)
 
-        console.log("Thank you for your purchase")
+      console.log("Thank you for your purchase")
+      console.log("what would you like to do next")
 
-        start();
-      });
-
+      start();
+    });
+    
 
     });
   })
-
-
+  
+ 
 };
